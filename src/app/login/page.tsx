@@ -49,10 +49,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#F7FAFC] bg-[radial-gradient(#4FD1C515_1px,transparent_1px)] [background-size:20px_20px] p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="bg-white p-8 pb-4 text-center border-b border-gray-100">
-          <img src="/logo.png" alt="Logo Nonnas" className="w-20 h-20 mx-auto mb-2 object-contain" />
-          <h1 className="text-3xl font-bold text-[#2B6CB0]">Nonnas</h1>
-          <p className="mt-1 text-sm font-medium tracking-widest text-[#4FD1C5]">AUXILIARES DE ENFERMERÍA</p>
+        <div className="p-8 pb-0 text-center flex flex-col items-center">
+          <img src="/logo.png" alt="Logo Nonnas" className="w-48 h-auto mx-auto mb-4 object-contain mix-blend-multiply" />
         </div>
         
         <div className="p-8">
