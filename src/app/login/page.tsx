@@ -35,7 +35,7 @@ export default function LoginPage() {
       const { data: profile } = await supabase
         .from('profiles')
         .select('rol')
-        .eq('id', data.user.id)
+        .eq('user_id', data.user.id)
         .single();
 
       if (profile?.rol === 'admin' || data.user.email === 'nuevo.admin@nonnas.com' || data.user.email === 'admin@nonnas.com') {
