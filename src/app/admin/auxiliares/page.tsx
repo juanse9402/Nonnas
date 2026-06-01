@@ -34,7 +34,6 @@ export default function AuxiliaresPage() {
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
-      .eq("rol", "auxiliar")
       .order("created_at", { ascending: false });
       
     if (!error && data) {
@@ -83,7 +82,7 @@ export default function AuxiliaresPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const registerNewUser = async (email: string, password: string, nombreCompleto: string, telefono: string) => {
+  const registerNewUser = async (email: string, password: string, nombreCompleto: string, telefono: string, rol: string) => {
     // Instancia temporal dedicada únicamente al registro (no cierra la sesión del Admin)
     const tempSupabase = createClient(
       'https://ljcdwvpgximnuerejffu.supabase.co',
@@ -104,7 +103,7 @@ export default function AuxiliaresPage() {
           nombre: nombreCompleto,
           nombre_completo: nombreCompleto,
           telefono: telefono,
-          rol: 'auxiliar'
+          rol: rol
         }
       }
     });
@@ -145,7 +144,7 @@ export default function AuxiliaresPage() {
           return;
         }
         const finalEmail = formData.usuario.includes('@') ? formData.usuario : `${formData.usuario}@app.nonnas`;
-        await registerNewUser(finalEmail, formData.password, formData.nombre, formData.telefono);
+        await registerNewUser(finalEmail, formData.password, formData.nombre, formData.telefono, formData.rol);
       }
       
       handleCloseModal();
@@ -193,7 +192,7 @@ export default function AuxiliaresPage() {
           className="bg-[#2B6CB0] text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-blue-800 transition-colors shadow-sm font-medium"
         >
           <Plus className="w-5 h-5" />
-          Agregar Auxiliar
+          Agregar Usuario
         </button>
       </div>
 
@@ -248,7 +247,7 @@ export default function AuxiliaresPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center p-6 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-800">{editingId ? "Editar Auxiliar" : "Nuevo Auxiliar"}</h2>
+              <h2 className="text-xl font-bold text-gray-800">{editingId ? "Editar Usuario" : "Nuevo Usuario"}</h2>
               <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
@@ -286,15 +285,16 @@ export default function AuxiliaresPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Nueva Contraseña (Opcional)</label>
                     <input type="password" name="newPassword" minLength={6} value={formData.newPassword} onChange={handleChange} placeholder="Dejar en blanco para mantener" className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5]" />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-                    <select name="rol" value={formData.rol} onChange={handleChange} className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] bg-white">
-                      <option value="auxiliar">Auxiliar</option>
-                      <option value="admin">Administrador</option>
-                    </select>
-                  </div>
                 </>
               )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Rol de Usuario</label>
+                <select name="rol" value={formData.rol} onChange={handleChange} className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] bg-white">
+                  <option value="auxiliar">Auxiliar de Enfermería</option>
+                  <option value="administrador">Administrador / Supervisor</option>
+                </select>
+              </div>
 
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={handleCloseModal} className="flex-1 py-3 px-4 border rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors">
