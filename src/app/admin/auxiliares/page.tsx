@@ -292,7 +292,7 @@ export default function AuxiliaresPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Rol de Usuario</label>
                 <select name="rol" value={formData.rol} onChange={handleChange} className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] bg-white">
                   <option value="auxiliar">Auxiliar de Enfermería</option>
-                  <option value="administrador">Administrador / Supervisor</option>
+                  <option value="admin">Administrador / Supervisor</option>
                 </select>
               </div>
 
