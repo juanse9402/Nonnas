@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User } from "lucide-react";
-import Logo from "@/components/Logo";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
@@ -51,7 +50,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#F7FAFC] bg-[radial-gradient(#4FD1C515_1px,transparent_1px)] [background-size:20px_20px] p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-white p-8 pb-4 text-center border-b border-gray-100">
-          <Logo className="w-24 h-24 mx-auto mb-2" />
+          <img src="/logo.png" alt="Logo Nonnas" className="w-20 h-20 mx-auto mb-2 object-contain" />
           <h1 className="text-3xl font-bold text-[#2B6CB0]">Nonnas</h1>
           <p className="mt-1 text-sm font-medium tracking-widest text-[#4FD1C5]">AUXILIARES DE ENFERMERÍA</p>
         </div>
