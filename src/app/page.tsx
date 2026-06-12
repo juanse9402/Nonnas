@@ -1079,10 +1079,10 @@ export default function AuxiliarDashboard() {
         </div>
       )}
       {/* Modals for Auxiliar */}
-      {isSignosModalOpen && activeTurn && <SignosVitalesModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsSignosModalOpen(false)} />}
-      {isGlucometriaModalOpen && activeTurn && <GlucometriaModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsGlucometriaModalOpen(false)} />}
-      {isDiuresisModalOpen && activeTurn && <DiuresisDeposicionesModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsDiuresisModalOpen(false)} />}
-      {isNotasModalOpen && activeTurn && <NotasEnfermeriaModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsNotasModalOpen(false)} />}
+      {isSignosModalOpen && activeTurn && <SignosVitalesModal pacienteId={activeTurn.pacientes.id} pacienteNombre={activeTurn.pacientes.nombre_completo} onClose={() => setIsSignosModalOpen(false)} />}
+      {isGlucometriaModalOpen && activeTurn && <GlucometriaModal pacienteId={activeTurn.pacientes.id} pacienteNombre={activeTurn.pacientes.nombre_completo} onClose={() => setIsGlucometriaModalOpen(false)} />}
+      {isDiuresisModalOpen && activeTurn && <DiuresisDeposicionesModal pacienteId={activeTurn.pacientes.id} pacienteNombre={activeTurn.pacientes.nombre_completo} onClose={() => setIsDiuresisModalOpen(false)} />}
+      {isNotasModalOpen && activeTurn && <NotasEnfermeriaModal pacienteId={activeTurn.pacientes.id} pacienteNombre={activeTurn.pacientes.nombre_completo} onClose={() => setIsNotasModalOpen(false)} />}
 
     </div>
   );
