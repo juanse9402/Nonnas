@@ -273,7 +273,7 @@ export default function GlucometriaModal({ pacienteId, pacienteNombre, onClose }
                           </td>
                           <td className="p-3 text-center">
                             <div className="flex items-center justify-center gap-1">
-                              {isAlert && <AlertCircle className="w-4 h-4 text-red-500" title={reg.datos.detalles_alerta} />}
+                              {isAlert && <span title={reg.datos.detalles_alerta}><AlertCircle className="w-4 h-4 text-red-500" /></span>}
                               <span className={`text-sm font-bold ${isAlert ? 'text-red-600' : 'text-gray-800'}`}>
                                 {reg.datos.glucometria || "-"}
                               </span>

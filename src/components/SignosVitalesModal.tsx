@@ -232,7 +232,7 @@ export default function SignosVitalesModal({ pacienteId, pacienteNombre, onClose
                           <td className="p-3 text-sm text-gray-700">{reg.datos.spo2}</td>
                           <td className="p-3 text-xs text-gray-600">
                             <div className="flex items-center gap-1">
-                              {isAlert && <AlertCircle className="w-3 h-3 text-red-500" title={reg.datos.detalles_alerta} />}
+                              {isAlert && <span title={reg.datos.detalles_alerta}><AlertCircle className="w-3 h-3 text-red-500" /></span>}
                               <span className="truncate max-w-[100px]" title={reg.profiles?.nombre_completo || reg.profiles?.nombre}>
                                 {reg.profiles?.nombre_completo?.split(' ')[0] || reg.profiles?.nombre || "Auxiliar"}
                               </span>
