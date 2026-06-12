@@ -95,13 +95,16 @@ export default function AuxiliarDashboard() {
         .single();
 
       if (profile) {
-        const now = new Date().toISOString();
+        const localNow = new Date();
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const nowLocalString = `${localNow.getFullYear()}-${pad(localNow.getMonth() + 1)}-${pad(localNow.getDate())}T${pad(localNow.getHours())}:${pad(localNow.getMinutes())}:${pad(localNow.getSeconds())}`;
+
         const { data: turnos } = await supabase
           .from("turnos_cronograma")
           .select("*, pacientes(*)")
           .eq("auxiliar_id", profile.id)
-          .lte("fecha_inicio", now)
-          .gte("fecha_fin", now)
+          .lte("fecha_inicio", nowLocalString)
+          .gte("fecha_fin", nowLocalString)
           .single();
 
         if (turnos) {
