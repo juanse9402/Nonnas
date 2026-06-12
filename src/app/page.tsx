@@ -12,6 +12,10 @@ import { evaluateVitals } from "@/lib/alertas";
 import { getFormulaMedica } from "@/lib/medicamentosService";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
+import NotasEnfermeriaModal from "@/components/NotasEnfermeriaModal";
+import SignosVitalesModal from "@/components/SignosVitalesModal";
+import GlucometriaModal from "@/components/GlucometriaModal";
+import DiuresisDeposicionesModal from "@/components/DiuresisDeposicionesModal";
 
 const weightData = [
   { name: "Ene", peso: 68 },
@@ -36,6 +40,10 @@ export default function AuxiliarDashboard() {
 
   // View & Form states
   const [activeView, setActiveView] = useState("home");
+  const [isSignosModalOpen, setIsSignosModalOpen] = useState(false);
+  const [isGlucometriaModalOpen, setIsGlucometriaModalOpen] = useState(false);
+  const [isDiuresisModalOpen, setIsDiuresisModalOpen] = useState(false);
+  const [isNotasModalOpen, setIsNotasModalOpen] = useState(false);
   
   // Form Data
   const [signos, setSignos] = useState({ pas: "", pad: "", fc: "", temp: "", spo2: "" });
@@ -603,16 +611,18 @@ export default function AuxiliarDashboard() {
 
       <div className="grid grid-cols-2 gap-4">
         {[
-          { id: "perfil", icon: User, label: "Perfil" },
-          { id: "signos", icon: Activity, label: "Signos vitales" },
-          { id: "medicamentos", icon: Pill, label: "Medicamentos" },
-          { id: "actividades", icon: ClipboardList, label: "Actividades" },
-          { id: "reportes", icon: FileText, label: "Reportes" },
-          { id: "mensajes", icon: MessageSquare, label: "Mensajes" },
+          { id: "perfil", icon: User, label: "Perfil", action: () => setActiveView("perfil") },
+          { id: "signos_modal", icon: Activity, label: "Signos Vitales", action: () => setIsSignosModalOpen(true) },
+          { id: "notas_modal", icon: ClipboardList, label: "Notas Enfermería", action: () => setIsNotasModalOpen(true) },
+          { id: "glucosa_modal", icon: Droplet, label: "Glucosa / Insulina", action: () => setIsGlucometriaModalOpen(true) },
+          { id: "esfinteres_modal", icon: Droplet, label: "Control Esfínteres", action: () => setIsDiuresisModalOpen(true) },
+          { id: "medicamentos", icon: Pill, label: "Medicamentos", action: () => setActiveView("medicamentos") },
+          { id: "reportes", icon: FileText, label: "Reportes", action: () => setActiveView("reportes") },
+          { id: "mensajes", icon: MessageSquare, label: "Mensajes", action: () => setActiveView("mensajes") },
         ].map((item) => (
           <button
             key={item.id}
-            onClick={() => setActiveView(item.id)}
+            onClick={item.action}
             className="flex flex-col items-center justify-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-[#4FD1C5] transition-all text-[#2B6CB0] active:scale-95 gap-3"
           >
             <item.icon className="w-10 h-10" strokeWidth={1.5} />
@@ -1067,7 +1077,12 @@ export default function AuxiliarDashboard() {
             </div>
           </div>
         </div>
-      )}
+      {/* Modals for Auxiliar */}
+      {isSignosModalOpen && activeTurn && <SignosVitalesModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsSignosModalOpen(false)} />}
+      {isGlucometriaModalOpen && activeTurn && <GlucometriaModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsGlucometriaModalOpen(false)} />}
+      {isDiuresisModalOpen && activeTurn && <DiuresisDeposicionesModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsDiuresisModalOpen(false)} />}
+      {isNotasModalOpen && activeTurn && <NotasEnfermeriaModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsNotasModalOpen(false)} />}
+
     </div>
   );
 }
