@@ -1077,6 +1077,7 @@ export default function AuxiliarDashboard() {
             </div>
           </div>
         </div>
+      )}
       {/* Modals for Auxiliar */}
       {isSignosModalOpen && activeTurn && <SignosVitalesModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsSignosModalOpen(false)} />}
       {isGlucometriaModalOpen && activeTurn && <GlucometriaModal pacienteId={activeTurn.pacientes.id} onClose={() => setIsGlucometriaModalOpen(false)} />}
