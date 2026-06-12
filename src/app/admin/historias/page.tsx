@@ -222,12 +222,12 @@ export default function AdminHistoriasPage() {
 
         {/* Historial cronológico */}
         <div className="md:col-span-3 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[70vh] flex flex-col">
-          <div className="flex justify-between items-start mb-6">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <div className="flex flex-col 2xl:flex-row justify-between items-start 2xl:items-center gap-4 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 whitespace-nowrap">
               <User className="w-6 h-6 text-purple-600" />
               Evolución del Paciente
             </h2>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 justify-end">
               <select 
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value as "semana" | "mes" | "todo")}
