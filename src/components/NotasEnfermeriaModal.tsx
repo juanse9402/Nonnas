@@ -29,7 +29,8 @@ export default function NotasEnfermeriaModal({ pacienteId, pacienteNombre, onClo
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        setCurrentUserId(session.user.id);
+        const { data: profile } = await supabase.from('profiles').select('id').eq('user_id', session.user.id).single();
+        if (profile) setCurrentUserId(profile.id);
       }
       
       const data = await getNotasPorPaciente(pacienteId);
