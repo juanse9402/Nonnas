@@ -66,8 +66,9 @@ export default function DiuresisDeposicionesModal({ pacienteId, pacienteNombre, 
       
       setRegistros([nuevoRegistro, ...registros].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
       setDatos({ ...datos, observacion_tratamiento: "" }); // Reseteamos observación para el siguiente
-    } catch (error) {
-      alert("Error al guardar el registro.");
+    } catch (error: any) {
+      console.error(error);
+      alert("Error al guardar el registro: " + (error.message || "Desconocido"));
     } finally {
       setSaving(false);
     }

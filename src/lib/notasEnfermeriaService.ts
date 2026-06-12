@@ -4,9 +4,8 @@ export type NotaEnfermeria = {
   id: string;
   paciente_id: string;
   auxiliar_id: string;
-  fecha: string;
-  hora: string;
-  observacion: string;
+  tipo_registro: string;
+  datos: { observacion: string };
   created_at: string;
   profiles?: {
     nombre_completo: string;
@@ -14,19 +13,14 @@ export type NotaEnfermeria = {
   };
 };
 
-export async function getNotasPorPaciente(pacienteId: string, fecha?: string) {
-  let query = supabase
-    .from("notas_enfermeria")
+export async function getNotasPorPaciente(pacienteId: string, limit: number = 50) {
+  const { data, error } = await supabase
+    .from("registros_clinicos")
     .select("*, profiles(nombre_completo, nombre)")
     .eq("paciente_id", pacienteId)
-    .order("fecha", { ascending: false })
-    .order("hora", { ascending: false });
-
-  if (fecha) {
-    query = query.eq("fecha", fecha);
-  }
-
-  const { data, error } = await query;
+    .eq("tipo_registro", "notas_enfermeria")
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (error) {
     console.error("Error al obtener notas de enfermería:", error);
@@ -36,10 +30,23 @@ export async function getNotasPorPaciente(pacienteId: string, fecha?: string) {
   return data as NotaEnfermeria[];
 }
 
-export async function crearNotaEnfermeria(nota: Omit<NotaEnfermeria, "id" | "created_at" | "profiles">) {
+export async function crearNotaEnfermeria(
+  pacienteId: string,
+  auxiliarId: string,
+  observacion: string,
+  fechaHoraIso: string
+) {
+  const payload = {
+    paciente_id: pacienteId,
+    auxiliar_id: auxiliarId,
+    tipo_registro: "notas_enfermeria",
+    created_at: fechaHoraIso,
+    datos: { observacion }
+  };
+
   const { data, error } = await supabase
-    .from("notas_enfermeria")
-    .insert([nota])
+    .from("registros_clinicos")
+    .insert([payload])
     .select("*, profiles(nombre_completo, nombre)")
     .single();
 
@@ -52,7 +59,7 @@ export async function crearNotaEnfermeria(nota: Omit<NotaEnfermeria, "id" | "cre
 }
 
 export async function eliminarNotaEnfermeria(id: string) {
-  const { error } = await supabase.from("notas_enfermeria").delete().eq("id", id);
+  const { error } = await supabase.from("registros_clinicos").delete().eq("id", id);
   if (error) {
     console.error("Error al eliminar nota de enfermería:", error);
     throw new Error(error.message);

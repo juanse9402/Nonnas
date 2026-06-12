@@ -45,17 +45,18 @@ export default function NotasEnfermeriaModal({ pacienteId, pacienteNombre, onClo
 
     setSaving(true);
     try {
-      const nuevaNota = await crearNotaEnfermeria({
-        paciente_id: pacienteId,
-        auxiliar_id: currentUserId,
-        fecha,
-        hora,
-        observacion
-      });
+      const fechaHoraIso = new Date(`${fecha}T${hora}:00`).toISOString();
+      const nuevaNota = await crearNotaEnfermeria(
+        pacienteId,
+        currentUserId,
+        observacion,
+        fechaHoraIso
+      );
       setNotas([nuevaNota, ...notas]);
       setObservacion(""); // Reset solo la observación, mantener fecha/hora
-    } catch (error) {
-      alert("Error al guardar la nota.");
+    } catch (error: any) {
+      console.error(error);
+      alert("Error al guardar la nota: " + (error.message || "Desconocido"));
     } finally {
       setSaving(false);
     }
@@ -163,7 +164,11 @@ export default function NotasEnfermeriaModal({ pacienteId, pacienteNombre, onClo
               </div>
             ) : (
               <div className="space-y-6">
-                {notas.map((nota) => (
+                {notas.map((nota) => {
+                  const d = new Date(nota.created_at);
+                  const horaStr = format(d, "HH:mm");
+                  const fechaStr = format(d, "EEEE, d 'de' MMMM", { locale: es });
+                  return (
                   <div key={nota.id} className="relative pl-6 before:absolute before:left-0 before:top-2 before:bottom-[-24px] before:w-0.5 before:bg-gray-200 last:before:hidden group">
                     <div className="absolute left-[-5px] top-2 w-3 h-3 rounded-full bg-purple-500 ring-4 ring-purple-50"></div>
                     
@@ -171,10 +176,10 @@ export default function NotasEnfermeriaModal({ pacienteId, pacienteNombre, onClo
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex flex-col">
                           <span className="font-bold text-gray-800 flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-purple-500" /> {nota.hora.substring(0, 5)}
+                            <Clock className="w-4 h-4 text-purple-500" /> {horaStr}
                           </span>
-                          <span className="text-xs text-gray-500 mt-0.5">
-                            {format(new Date(nota.fecha + "T12:00:00"), "EEEE, d 'de' MMMM", { locale: es })}
+                          <span className="text-xs text-gray-500 mt-0.5 capitalize">
+                            {fechaStr}
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -191,11 +196,11 @@ export default function NotasEnfermeriaModal({ pacienteId, pacienteNombre, onClo
                         </div>
                       </div>
                       <p className="text-gray-700 whitespace-pre-wrap text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-50">
-                        {nota.observacion}
+                        {nota.datos?.observacion}
                       </p>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             )}
           </div>

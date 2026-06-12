@@ -66,8 +66,9 @@ export default function SignosVitalesModal({ pacienteId, pacienteNombre, onClose
       
       setRegistros([nuevoRegistro, ...registros].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
       setSignos({ pas: "", pad: "", fc: "", temp: "", spo2: "" });
-    } catch (error) {
-      alert("Error al guardar los signos vitales.");
+    } catch (error: any) {
+      console.error(error);
+      alert("Error al guardar los signos vitales: " + (error.message || "Desconocido"));
     } finally {
       setSaving(false);
     }

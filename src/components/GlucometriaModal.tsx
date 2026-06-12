@@ -89,8 +89,9 @@ export default function GlucometriaModal({ pacienteId, pacienteNombre, onClose }
 
       setRegistros([nuevoRegistro, ...registros].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
       setDatos({ ...datos, glucometria: "", insulina: "", observacion: "" });
-    } catch (error) {
-      alert("Error al guardar el registro.");
+    } catch (error: any) {
+      console.error(error);
+      alert("Error al guardar el registro: " + (error.message || "Desconocido"));
     } finally {
       setSaving(false);
     }
