@@ -9,6 +9,7 @@ import Logo from "@/components/Logo";
 import { supabase } from "@/lib/supabaseClient";
 import { saveOfflineRecord, syncOfflineRecords, getOfflineRecords } from "@/lib/offlineSync";
 import { evaluateVitals } from "@/lib/alertas";
+import { getFormulaMedica } from "@/lib/medicamentosService";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 
@@ -107,12 +108,40 @@ export default function AuxiliarDashboard() {
           setActiveTurn(turnos);
           fetchReportes(turnos.id);
           fetchHistorialPeso(turnos.pacientes.id);
-          // Simularemos medicamentos por ahora, idealmente leer de tabla medicamentos_paciente
-          setMedicamentos([
-            { id: 1, med: "Losartán 50mg", time: "08:00 AM", entregado: false },
-            { id: 2, med: "Metformina 850mg", time: "08:00 AM", entregado: false },
-            { id: 3, med: "Omeprazol 20mg", time: "02:00 PM", entregado: false }
-          ]);
+          // Cargar medicamentos reales
+          const formula = await getFormulaMedica(turnos.pacientes.id);
+          
+          // Verificar cuáles ya se entregaron hoy
+          const hoy = new Date();
+          hoy.setHours(0,0,0,0);
+          const { data: entregadosHoy } = await supabase
+            .from("registro_medicamentos_entregados")
+            .select("*")
+            .eq("paciente_id", turnos.pacientes.id)
+            .gte("created_at", hoy.toISOString());
+
+          const entregadosSet = new Set(
+            entregadosHoy?.map(e => `${e.medicamento_nombre}-${e.hora_programada}`) || []
+          );
+
+          // Expandir los horarios en items individuales
+          const medItems: any[] = [];
+          formula.forEach((med, idx) => {
+            med.horarios.forEach((hora, hIdx) => {
+              const medName = `${med.medicamento_nombre} ${med.presentacion}`;
+              const isEntregado = entregadosSet.has(`${medName}-${hora}`);
+              medItems.push({
+                id: `${med.id}-${hIdx}`,
+                med: medName,
+                time: hora,
+                entregado: isEntregado
+              });
+            });
+          });
+
+          // Ordenar por hora programada
+          medItems.sort((a, b) => a.time.localeCompare(b.time));
+          setMedicamentos(medItems);
           
           try {
             const res = await fetch("/api/get-historias", {

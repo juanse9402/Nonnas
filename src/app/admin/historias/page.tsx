@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { ClipboardList, User, CalendarDays, Download } from "lucide-react";
+import { ClipboardList, User, CalendarDays, Download, Clock, Activity, Pill, Droplet, Droplets } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
+import NotasEnfermeriaModal from "@/components/NotasEnfermeriaModal";
+import SignosVitalesModal from "@/components/SignosVitalesModal";
+import MedicamentosAdminModal from "@/components/MedicamentosAdminModal";
+import DiuresisDeposicionesModal from "@/components/DiuresisDeposicionesModal";
+import GlucometriaModal from "@/components/GlucometriaModal";
 
 export default function AdminHistoriasPage() {
   const [historias, setHistorias] = useState<any[]>([]);
@@ -14,6 +19,11 @@ export default function AdminHistoriasPage() {
   const [selectedPacienteId, setSelectedPacienteId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<"semana" | "mes" | "todo">("todo");
   const [loading, setLoading] = useState(true);
+  const [isNotasModalOpen, setIsNotasModalOpen] = useState(false);
+  const [isSignosModalOpen, setIsSignosModalOpen] = useState(false);
+  const [isMedicamentosModalOpen, setIsMedicamentosModalOpen] = useState(false);
+  const [isDiuresisModalOpen, setIsDiuresisModalOpen] = useState(false);
+  const [isGlucometriaModalOpen, setIsGlucometriaModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchPacientes() {
@@ -228,6 +238,46 @@ export default function AdminHistoriasPage() {
                 <option value="todo">Todo el historial</option>
               </select>
               <button
+                onClick={() => setIsGlucometriaModalOpen(true)}
+                disabled={!selectedPacienteId}
+                className="flex items-center gap-2 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <Droplets className="w-4 h-4" />
+                Glucosa / Insulina
+              </button>
+              <button
+                onClick={() => setIsDiuresisModalOpen(true)}
+                disabled={!selectedPacienteId}
+                className="flex items-center gap-2 bg-amber-100 hover:bg-amber-200 text-amber-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <Droplet className="w-4 h-4" />
+                Control Esfínteres
+              </button>
+              <button
+                onClick={() => setIsMedicamentosModalOpen(true)}
+                disabled={!selectedPacienteId}
+                className="flex items-center gap-2 bg-rose-100 hover:bg-rose-200 text-rose-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <Pill className="w-4 h-4" />
+                Fórmula Médica
+              </button>
+              <button
+                onClick={() => setIsSignosModalOpen(true)}
+                disabled={!selectedPacienteId}
+                className="flex items-center gap-2 bg-teal-100 hover:bg-teal-200 text-teal-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <Activity className="w-4 h-4" />
+                Signos Vitales
+              </button>
+              <button
+                onClick={() => setIsNotasModalOpen(true)}
+                disabled={!selectedPacienteId}
+                className="flex items-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <Clock className="w-4 h-4" />
+                Notas de Enfermería
+              </button>
+              <button
                 onClick={handleExportPDF}
                 disabled={!selectedPacienteId || historias.length === 0}
                 className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
@@ -269,6 +319,46 @@ export default function AdminHistoriasPage() {
           </div>
         </div>
       </div>
+      
+      {isNotasModalOpen && selectedPacienteId && (
+        <NotasEnfermeriaModal 
+          pacienteId={selectedPacienteId}
+          pacienteNombre={pacientes.find(p => p.id === selectedPacienteId)?.nombre_completo || "Paciente"}
+          onClose={() => setIsNotasModalOpen(false)}
+        />
+      )}
+
+      {isSignosModalOpen && selectedPacienteId && (
+        <SignosVitalesModal 
+          pacienteId={selectedPacienteId}
+          pacienteNombre={pacientes.find(p => p.id === selectedPacienteId)?.nombre_completo || "Paciente"}
+          onClose={() => setIsSignosModalOpen(false)}
+        />
+      )}
+
+      {isMedicamentosModalOpen && selectedPacienteId && (
+        <MedicamentosAdminModal 
+          pacienteId={selectedPacienteId}
+          pacienteNombre={pacientes.find(p => p.id === selectedPacienteId)?.nombre_completo || "Paciente"}
+          onClose={() => setIsMedicamentosModalOpen(false)}
+        />
+      )}
+
+      {isDiuresisModalOpen && selectedPacienteId && (
+        <DiuresisDeposicionesModal 
+          pacienteId={selectedPacienteId}
+          pacienteNombre={pacientes.find(p => p.id === selectedPacienteId)?.nombre_completo || "Paciente"}
+          onClose={() => setIsDiuresisModalOpen(false)}
+        />
+      )}
+
+      {isGlucometriaModalOpen && selectedPacienteId && (
+        <GlucometriaModal 
+          pacienteId={selectedPacienteId}
+          pacienteNombre={pacientes.find(p => p.id === selectedPacienteId)?.nombre_completo || "Paciente"}
+          onClose={() => setIsGlucometriaModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
