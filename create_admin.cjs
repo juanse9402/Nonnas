@@ -31,7 +31,7 @@ async function main() {
   const { error: updateError } = await supabase
     .from('profiles')
     .update({ rol: 'admin', nombre: 'Nuevo Admin' })
-    .eq('id', userId);
+    .eq('user_id', userId);
 
   if (updateError) {
     console.error("Error al actualizar el perfil:", updateError.message);

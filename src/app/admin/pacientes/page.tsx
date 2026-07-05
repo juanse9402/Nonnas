@@ -12,6 +12,7 @@ type Paciente = {
   diagnostico: string;
   direccion: string;
   contacto_emergencia: string;
+  nombre_responsable?: string;
 };
 
 export default function PacientesPage() {
@@ -27,6 +28,7 @@ export default function PacientesPage() {
     diagnostico: "",
     direccion: "",
     contacto_emergencia: "",
+    nombre_responsable: "",
   });
 
   const fetchPacientes = async () => {
@@ -41,7 +43,6 @@ export default function PacientesPage() {
   useEffect(() => {
     fetchPacientes();
   }, []);
-
   const handleOpenModal = (paciente?: Paciente) => {
     if (paciente) {
       setEditingId(paciente.id);
@@ -52,6 +53,7 @@ export default function PacientesPage() {
         diagnostico: paciente.diagnostico || "",
         direccion: paciente.direccion || "",
         contacto_emergencia: paciente.contacto_emergencia || "",
+        nombre_responsable: paciente.nombre_responsable || "",
       });
     } else {
       setEditingId(null);
@@ -62,6 +64,7 @@ export default function PacientesPage() {
         diagnostico: "",
         direccion: "",
         contacto_emergencia: "",
+        nombre_responsable: "",
       });
     }
     setModalOpen(true);
@@ -85,6 +88,8 @@ export default function PacientesPage() {
       diagnostico: formData.diagnostico,
       direccion: formData.direccion,
       contacto_emergencia: formData.contacto_emergencia,
+      telefono_responsable: formData.contacto_emergencia,
+      nombre_responsable: formData.nombre_responsable,
     };
 
     if (editingId) {
@@ -142,7 +147,9 @@ export default function PacientesPage() {
                     <td className="p-4 font-medium text-gray-800">{p.nombre_completo}</td>
                     <td className="p-4 text-gray-600">{p.edad} años</td>
                     <td className="p-4 text-gray-600">{p.diagnostico}</td>
-                    <td className="p-4 text-gray-600">{p.contacto_emergencia}</td>
+                    <td className="p-4 text-gray-600">
+                      {p.nombre_responsable ? `${p.nombre_responsable} (${p.contacto_emergencia})` : p.contacto_emergencia}
+                    </td>
                     <td className="p-4 flex justify-end gap-2">
                       <button onClick={() => handleOpenModal(p)} className="p-2 text-[#2B6CB0] hover:bg-blue-50 rounded-lg transition-colors">
                         <Edit2 className="w-4 h-4" />
@@ -191,9 +198,15 @@ export default function PacientesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
                 <input required name="direccion" value={formData.direccion} onChange={handleChange} className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5]" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contacto de Emergencia (Teléfono)</label>
-                <input required name="contacto_emergencia" value={formData.contacto_emergencia} onChange={handleChange} className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5]" />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Contacto Emergencia</label>
+                  <input required name="nombre_responsable" value={formData.nombre_responsable} onChange={handleChange} className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] focus:border-[#4FD1C5]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono Contacto Emergencia</label>
+                  <input required name="contacto_emergencia" value={formData.contacto_emergencia} onChange={handleChange} className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] focus:border-[#4FD1C5]" />
+                </div>
               </div>
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={handleCloseModal} className="flex-1 py-3 px-4 border rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors">
