@@ -305,58 +305,89 @@ export default function CronogramaPage() {
           </button>
         </div>
 
-        {/* Cuadrícula */}
-        <div className="grid grid-cols-7 divide-x divide-gray-100 min-h-[500px]">
-          {weekDays.map((day, i) => (
-            <div key={i} className="flex flex-col">
-              <div className="p-3 text-center border-b border-gray-100 bg-gray-50">
-                <p className="text-sm font-medium text-gray-500 capitalize">{format(day, "EEEE", { locale: es })}</p>
-                <p className={`text-xl font-bold mt-1 ${isSameDay(day, new Date()) ? 'text-[#2B6CB0]' : 'text-gray-800'}`}>
-                  {format(day, "d")}
-                </p>
-              </div>
-              <div className="flex-1 p-2 space-y-2 overflow-y-auto">
-                {turnos
-                  .filter((t) => {
-                    const fechaDia = new Date(day);
-                    fechaDia.setHours(0, 0, 0, 0);
+        {/* Cuadrícula en formato Matriz (Filas: Pacientes, Columnas: Días) */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse border-t border-gray-100 min-w-[1000px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100 text-gray-600 font-medium">
+                <th className="p-4 border-r border-gray-100 w-1/8 font-bold text-gray-700">Paciente</th>
+                {weekDays.map((day, i) => (
+                  <th key={i} className="p-3 text-center border-r border-gray-100 bg-gray-50 w-1/8">
+                    <p className="text-xs font-semibold text-gray-500 capitalize">{format(day, "EEEE", { locale: es })}</p>
+                    <p className={`text-lg font-bold mt-0.5 ${isSameDay(day, new Date()) ? 'text-[#2B6CB0]' : 'text-gray-800'}`}>
+                      {format(day, "d")}
+                    </p>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {pacientes.map((p) => {
+                const pColors = getPatientColor(p.id, pacientes);
+                return (
+                  <tr key={p.id} className="hover:bg-gray-50/10 transition-colors">
+                    {/* Nombre del Paciente */}
+                    <td className="p-4 border-r border-gray-100 font-bold align-middle w-1/8" style={{ ...pColors.style, borderLeft: `5px solid ${pColors.style.borderColor}` }}>
+                      <span className="block text-sm leading-snug">{p.nombre_completo}</span>
+                    </td>
                     
-                    const inicio = new Date(t.fecha_inicio);
-                    inicio.setHours(0, 0, 0, 0);
-                    
-                    const fin = new Date(t.fecha_fin);
-                    fin.setHours(23, 59, 59, 999);
-                    
-                    return fechaDia >= inicio && fechaDia <= fin;
-                  })
-                  .map((t) => {
-                    const pColors = getPatientColor(t.paciente_id, pacientes);
-                    const aColors = getAuxiliarColor(t.auxiliar_id, auxiliares);
-                    return (
-                      <div 
-                        key={t.id} 
-                        onClick={() => handleOpenModal(t)}
-                        className="p-3 rounded-xl text-xs border cursor-pointer hover:shadow-md transition-all"
-                        style={pColors.style}
-                      >
-                        <p className="font-bold truncate">
-                          {t.pacientes?.nombre_completo || 'Paciente Desconocido'}
-                        </p>
-                        <div className="mt-1.5 mb-2">
-                          <span className="inline-block px-2.5 py-1 rounded-lg font-semibold text-[10px] truncate max-w-full border" style={aColors.style}>
-                            {t.profiles?.nombre || 'Auxiliar Desconocido'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] font-medium" style={pColors.labelStyle}>
-                          <Clock className="w-3 h-3" />
-                          {t.fecha_inicio.includes('T') ? t.fecha_inicio.split('T')[1].substring(0,5) : t.fecha_inicio} ({t.tipo_turno})
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          ))}
+                    {/* Días de la semana */}
+                    {weekDays.map((day, dIdx) => {
+                      const turnosDelDia = turnos.filter((t) => {
+                        if (t.paciente_id !== p.id) return false;
+                        
+                        const fechaDia = new Date(day);
+                        fechaDia.setHours(0, 0, 0, 0);
+                        
+                        const inicio = new Date(t.fecha_inicio);
+                        inicio.setHours(0, 0, 0, 0);
+                        
+                        const fin = new Date(t.fecha_fin);
+                        fin.setHours(23, 59, 59, 999);
+                        
+                        return fechaDia >= inicio && fechaDia <= fin;
+                      });
+
+                      return (
+                        <td key={dIdx} className="p-2.5 border-r border-gray-100 align-top w-1/8 min-w-[120px]">
+                          <div className="space-y-2">
+                            {turnosDelDia.map((t) => {
+                              const aColors = getAuxiliarColor(t.auxiliar_id, auxiliares);
+                              return (
+                                <div 
+                                  key={t.id} 
+                                  onClick={() => handleOpenModal(t)}
+                                  className="p-2 rounded-xl text-[11px] border cursor-pointer hover:shadow-md transition-all bg-white"
+                                  style={{ borderColor: aColors.style.borderColor }}
+                                >
+                                  <div className="mb-1">
+                                    <span className="inline-block px-2 py-0.5 rounded-md font-semibold text-[9px] truncate max-w-full" style={aColors.style}>
+                                      {t.profiles?.nombre || 'Auxiliar Desconocido'}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-[9px] font-medium text-gray-500">
+                                    <Clock className="w-2.5 h-2.5 text-gray-400" />
+                                    <span>
+                                      {t.fecha_inicio.includes('T') ? t.fecha_inicio.split('T')[1].substring(0,5) : t.fecha_inicio} ({t.tipo_turno})
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {turnosDelDia.length === 0 && (
+                              <div className="py-3 border border-dashed border-gray-100 rounded-xl flex items-center justify-center text-[9px] text-gray-300 font-medium">
+                                Sin turno
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 
