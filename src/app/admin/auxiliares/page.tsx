@@ -11,6 +11,7 @@ type Auxiliar = {
   nombre: string;
   telefono: string;
   rol: string;
+  email?: string;
 };
 
 export default function AuxiliaresPage() {
@@ -53,7 +54,7 @@ export default function AuxiliaresPage() {
         user_id: auxiliar.user_id || null,
         nombre: auxiliar.nombre || "",
         telefono: auxiliar.telefono || "",
-        usuario: "Oculto (Seguridad)",
+        usuario: auxiliar.email || "",
         password: "",
         newPassword: "",
         rol: auxiliar.rol || "auxiliar",
@@ -219,7 +220,10 @@ export default function AuxiliaresPage() {
                       <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs">
                         {a.nombre.charAt(0).toUpperCase()}
                       </div>
-                      {a.nombre}
+                      <div>
+                        <p className="font-semibold text-gray-800">{a.nombre}</p>
+                        <p className="text-xs text-gray-400 font-normal">{a.email || 'Sin usuario'}</p>
+                      </div>
                     </td>
                     <td className="p-4 text-gray-600">{a.telefono}</td>
                     <td className="p-4">
