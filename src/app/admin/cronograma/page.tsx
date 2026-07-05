@@ -20,7 +20,7 @@ type Turno = {
 type Paciente = { id: string; nombre_completo: string };
 type Auxiliar = { id: string; nombre: string };
 
-const getPatientColor = (id: string) => {
+const getPatientColor = (id: string, list: Paciente[]) => {
   const colors = [
     { bg: 'bg-blue-50 border-blue-200 text-blue-900 hover:bg-blue-100/50', text: 'text-blue-900', label: 'text-blue-600' },
     { bg: 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:bg-emerald-100/50', text: 'text-emerald-900', label: 'text-emerald-600' },
@@ -28,16 +28,19 @@ const getPatientColor = (id: string) => {
     { bg: 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100/50', text: 'text-amber-900', label: 'text-amber-600' },
     { bg: 'bg-rose-50 border-rose-200 text-rose-900 hover:bg-rose-100/50', text: 'text-rose-900', label: 'text-rose-600' },
     { bg: 'bg-indigo-50 border-indigo-200 text-indigo-900 hover:bg-indigo-100/50', text: 'text-indigo-900', label: 'text-indigo-600' },
+    { bg: 'bg-teal-50 border-teal-200 text-teal-900 hover:bg-teal-100/50', text: 'text-teal-900', label: 'text-teal-600' },
+    { bg: 'bg-cyan-50 border-cyan-200 text-cyan-900 hover:bg-cyan-100/50', text: 'text-cyan-900', label: 'text-cyan-600' },
+    { bg: 'bg-violet-50 border-violet-200 text-violet-900 hover:bg-violet-100/50', text: 'text-violet-900', label: 'text-violet-600' },
+    { bg: 'bg-orange-50 border-orange-200 text-orange-900 hover:bg-orange-100/50', text: 'text-orange-900', label: 'text-orange-600' },
+    { bg: 'bg-lime-50 border-lime-200 text-lime-900 hover:bg-lime-100/50', text: 'text-lime-900', label: 'text-lime-600' },
+    { bg: 'bg-pink-50 border-pink-200 text-pink-900 hover:bg-pink-100/50', text: 'text-pink-900', label: 'text-pink-600' },
   ];
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
+  const listIndex = list.findIndex(item => item.id === id);
+  const index = listIndex !== -1 ? listIndex : 0;
+  return colors[index % colors.length];
 };
 
-const getAuxiliarColor = (id: string) => {
+const getAuxiliarColor = (id: string, list: Auxiliar[]) => {
   const colors = [
     { badge: 'bg-violet-100 text-violet-800 border border-violet-200' },
     { badge: 'bg-sky-100 text-sky-800 border border-sky-200' },
@@ -45,13 +48,16 @@ const getAuxiliarColor = (id: string) => {
     { badge: 'bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200' },
     { badge: 'bg-orange-100 text-orange-800 border border-orange-200' },
     { badge: 'bg-lime-100 text-lime-800 border border-lime-200' },
+    { badge: 'bg-rose-100 text-rose-800 border border-rose-200' },
+    { badge: 'bg-cyan-100 text-cyan-800 border border-cyan-200' },
+    { badge: 'bg-amber-100 text-amber-800 border border-amber-200' },
+    { badge: 'bg-indigo-100 text-indigo-800 border border-indigo-200' },
+    { badge: 'bg-emerald-100 text-emerald-800 border border-emerald-200' },
+    { badge: 'bg-red-100 text-red-800 border border-red-200' },
   ];
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
+  const listIndex = list.findIndex(item => item.id === id);
+  const index = listIndex !== -1 ? listIndex : 0;
+  return colors[index % colors.length];
 };
 
 export default function CronogramaPage() {
@@ -150,6 +156,34 @@ export default function CronogramaPage() {
     if (editingId) {
       const { error } = await supabase.from("turnos_cronograma").update(payload).eq("id", editingId);
       if (!error) {
+        if (formData.repetir !== "ninguno") {
+          const cant = parseInt(formData.repetir_cant) || 1;
+          const inicioOriginal = new Date(formData.fecha_inicio);
+          const finOriginal = new Date(formData.fecha_fin);
+          const repeatPayloads = [];
+          
+          for (let i = 1; i <= cant; i++) {
+            let nuevoInicio: Date;
+            let nuevoFin: Date;
+            
+            if (formData.repetir === "semanal") {
+              nuevoInicio = addWeeks(inicioOriginal, i);
+              nuevoFin = addWeeks(finOriginal, i);
+            } else { // mensual
+              nuevoInicio = addMonths(inicioOriginal, i);
+              nuevoFin = addMonths(finOriginal, i);
+            }
+            
+            repeatPayloads.push({
+              paciente_id: formData.paciente_id,
+              auxiliar_id: formData.auxiliar_id,
+              fecha_inicio: format(nuevoInicio, "yyyy-MM-dd'T'HH:mm"),
+              fecha_fin: format(nuevoFin, "yyyy-MM-dd'T'HH:mm"),
+              tipo_turno: formData.tipo_turno,
+            });
+          }
+          await supabase.from("turnos_cronograma").insert(repeatPayloads);
+        }
         setModalOpen(false);
         fetchData();
       } else {
@@ -242,7 +276,7 @@ export default function CronogramaPage() {
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pacientes (Color de Tarjeta):</span>
           <div className="flex flex-wrap gap-2">
             {pacientes.map((p) => {
-              const colors = getPatientColor(p.id);
+              const colors = getPatientColor(p.id, pacientes);
               return (
                 <span key={p.id} className={`px-3 py-1 rounded-full text-xs font-semibold border ${colors.bg}`}>
                   {p.nombre_completo}
@@ -255,7 +289,7 @@ export default function CronogramaPage() {
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Auxiliares (Tarjeta Pequeña):</span>
           <div className="flex flex-wrap gap-2">
             {auxiliares.map((a) => {
-              const colors = getAuxiliarColor(a.id);
+              const colors = getAuxiliarColor(a.id, auxiliares);
               return (
                 <span key={a.id} className={`px-3 py-1 rounded-full text-xs font-semibold ${colors.badge}`}>
                   {a.nombre}
@@ -305,8 +339,8 @@ export default function CronogramaPage() {
                     return fechaDia >= inicio && fechaDia <= fin;
                   })
                   .map((t) => {
-                    const pColors = getPatientColor(t.paciente_id);
-                    const aColors = getAuxiliarColor(t.auxiliar_id);
+                    const pColors = getPatientColor(t.paciente_id, pacientes);
+                    const aColors = getAuxiliarColor(t.auxiliar_id, auxiliares);
                     return (
                       <div 
                         key={t.id} 
@@ -376,37 +410,35 @@ export default function CronogramaPage() {
                   <option value="24h">24 Horas</option>
                 </select>
               </div>
-              {!editingId && (
-                <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Repetir turno</label>
-                    <select 
-                      value={formData.repetir} 
-                      onChange={(e) => setFormData({...formData, repetir: e.target.value})} 
-                      className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] bg-white text-sm"
-                    >
-                      <option value="ninguno">No repetir</option>
-                      <option value="semanal">Semanalmente</option>
-                      <option value="mensual">Mensualmente</option>
-                    </select>
-                  </div>
-                  {formData.repetir !== "ninguno" && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Veces ({formData.repetir === 'semanal' ? 'semanas' : 'meses'})
-                      </label>
-                      <input 
-                        type="number" 
-                        min="1" 
-                        max="52" 
-                        value={formData.repetir_cant} 
-                        onChange={(e) => setFormData({...formData, repetir_cant: e.target.value})} 
-                        className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] text-sm" 
-                      />
-                    </div>
-                  )}
+              <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Repetir turno</label>
+                  <select 
+                    value={formData.repetir} 
+                    onChange={(e) => setFormData({...formData, repetir: e.target.value})} 
+                    className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] bg-white text-sm"
+                  >
+                    <option value="ninguno">No repetir</option>
+                    <option value="semanal">Semanalmente</option>
+                    <option value="mensual">Mensualmente</option>
+                  </select>
                 </div>
-              )}
+                {formData.repetir !== "ninguno" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Veces ({formData.repetir === 'semanal' ? 'semanas' : 'meses'})
+                    </label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="52" 
+                      value={formData.repetir_cant} 
+                      onChange={(e) => setFormData({...formData, repetir_cant: e.target.value})} 
+                      className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] text-sm" 
+                    />
+                  </div>
+                )}
+              </div>
               <div className="pt-4 flex gap-3 flex-wrap">
                 <button type="button" onClick={() => setModalOpen(false)} className="flex-1 py-3 px-4 border rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors">
                   Cancelar
