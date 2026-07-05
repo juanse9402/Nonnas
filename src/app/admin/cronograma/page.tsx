@@ -201,11 +201,20 @@ export default function CronogramaPage() {
       if (!error) {
         setModalOpen(false);
         fetchData();
-      } else {
-        alert("Error al eliminar el turno");
       }
     }
   };
+
+  const endDate = addDays(startDate, 6);
+  const startMonth = format(startDate, "MMMM", { locale: es });
+  const endMonth = format(endDate, "MMMM", { locale: es });
+  const startYear = format(startDate, "yyyy");
+  const endYear = format(endDate, "yyyy");
+  const headerLabel = startMonth === endMonth 
+    ? format(startDate, "MMMM yyyy", { locale: es })
+    : startYear === endYear 
+      ? `${startMonth} - ${endMonth} ${startYear}`
+      : `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
 
   return (
     <div className="space-y-6">
@@ -264,7 +273,7 @@ export default function CronogramaPage() {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <h2 className="text-lg font-bold text-gray-700 capitalize">
-            {format(startDate, "MMMM yyyy", { locale: es })}
+            {headerLabel}
           </h2>
           <button onClick={handleNextWeek} className="p-2 hover:bg-gray-200 rounded-lg">
             <ChevronRight className="w-5 h-5" />
