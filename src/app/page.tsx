@@ -35,6 +35,7 @@ export default function AuxiliarDashboard() {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeTurn, setActiveTurn] = useState<any>(null);
+  const [misTurnos, setMisTurnos] = useState<any[]>([]);
   const [medicamentos, setMedicamentos] = useState<any[]>([]);
   const [reportes, setReportes] = useState<any[]>([]);
 
@@ -114,6 +115,17 @@ export default function AuxiliarDashboard() {
           .lte("fecha_inicio", nowLocalString)
           .gte("fecha_fin", nowLocalString)
           .single();
+
+        const { data: todosTurnos } = await supabase
+          .from("turnos_cronograma")
+          .select("*, pacientes(*)")
+          .eq("auxiliar_id", profile.id)
+          .gte("fecha_fin", nowLocalString)
+          .order("fecha_inicio", { ascending: true });
+        
+        if (todosTurnos) {
+          setMisTurnos(todosTurnos);
+        }
 
         if (turnos) {
           setActiveTurn(turnos);
@@ -571,17 +583,61 @@ export default function AuxiliarDashboard() {
 
   if (!activeTurn) {
     return (
-      <div className="min-h-screen bg-[#F7FAFC] p-6 text-center">
-        <header className="flex justify-between items-center mb-12">
-          <Logo className="w-10 h-10" />
+      <div className="min-h-screen bg-[#F7FAFC] p-6 text-center max-w-2xl mx-auto">
+        <header className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-2">
+            <Logo className="w-8 h-8" />
+            <span className="font-bold text-xl tracking-tight text-[#2B6CB0]">Nonnas</span>
+          </div>
           <button onClick={handleLogout} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
             <LogOut className="w-6 h-6" />
           </button>
         </header>
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-          <CalendarList className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Sin turno activo</h2>
-          <p className="text-gray-500">No tienes turnos programados para el día y hora actual.</p>
+        
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-8">
+          <CalendarList className="w-12 h-12 mx-auto text-[#4FD1C5] mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Sin turno activo</h2>
+          <p className="text-gray-500 text-sm">No tienes turnos programados para el día y hora actual.</p>
+        </div>
+
+        <div className="text-left space-y-4">
+          <h3 className="font-bold text-gray-700 text-lg">Tu Cronograma de Turnos</h3>
+          {misTurnos.length === 0 ? (
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 text-center text-gray-500 text-sm">
+              No tienes turnos futuros programados.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {misTurnos.map((t) => {
+                const parseDate = (dStr: string) => {
+                  try {
+                    const d = new Date(dStr);
+                    return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+                  } catch(e) { return dStr; }
+                };
+                const parseTime = (dStr: string) => {
+                  if (dStr.includes('T')) return dStr.split('T')[1].substring(0, 5);
+                  return dStr;
+                };
+                return (
+                  <div key={t.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center gap-4">
+                    <div>
+                      <p className="font-bold text-[#2B6CB0] text-base">{t.pacientes?.nombre_completo}</p>
+                      <p className="text-xs text-gray-500 capitalize mt-1">
+                        {parseDate(t.fecha_inicio)}
+                      </p>
+                      <p className="text-xs font-semibold text-gray-400 mt-0.5">
+                        {parseTime(t.fecha_inicio)} a {parseTime(t.fecha_fin)} ({t.tipo_turno})
+                      </p>
+                    </div>
+                    <span className="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide">
+                      Programado
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     );
