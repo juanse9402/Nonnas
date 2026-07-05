@@ -363,10 +363,7 @@ export default function CronogramaPage() {
                         const inicio = new Date(t.fecha_inicio);
                         inicio.setHours(0, 0, 0, 0);
                         
-                        const fin = new Date(t.fecha_fin);
-                        fin.setHours(23, 59, 59, 999);
-                        
-                        return fechaDia >= inicio && fechaDia <= fin;
+                        return isSameDay(fechaDia, inicio);
                       });
 
                       return (
@@ -386,11 +383,24 @@ export default function CronogramaPage() {
                                       {t.profiles?.nombre || 'Auxiliar Desconocido'}
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-1 text-[9px] font-medium text-gray-500">
-                                    <Clock className="w-2.5 h-2.5 text-gray-400" />
-                                    <span>
-                                      {t.fecha_inicio.includes('T') ? t.fecha_inicio.split('T')[1].substring(0,5) : t.fecha_inicio} ({t.tipo_turno})
-                                    </span>
+                                  <div className="flex flex-col gap-0.5 text-[9px] font-medium text-gray-500">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-2.5 h-2.5 text-gray-400" />
+                                      <span>
+                                        {(() => {
+                                          const getHour = (str: string) => {
+                                            if (!str.includes('T')) return str;
+                                            return str.split('T')[1].substring(0, 5);
+                                          };
+                                          const hInicio = getHour(t.fecha_inicio);
+                                          const hFin = getHour(t.fecha_fin);
+                                          return t.tipo_turno === '24h' 
+                                            ? `${hInicio} a ${hFin} (+1d)`
+                                            : `${hInicio} a ${hFin}`;
+                                        })()}
+                                      </span>
+                                    </div>
+                                    <span className="text-[8px] text-gray-400 font-bold ml-3.5 uppercase">{t.tipo_turno}</span>
                                   </div>
                                 </div>
                               );
