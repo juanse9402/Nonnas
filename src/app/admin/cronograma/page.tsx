@@ -21,43 +21,34 @@ type Paciente = { id: string; nombre_completo: string };
 type Auxiliar = { id: string; nombre: string };
 
 const getPatientColor = (id: string, list: Paciente[]) => {
-  const colors = [
-    { bg: 'bg-blue-50 border-blue-200 text-blue-900 hover:bg-blue-100/50', text: 'text-blue-900', label: 'text-blue-600' },
-    { bg: 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:bg-emerald-100/50', text: 'text-emerald-900', label: 'text-emerald-600' },
-    { bg: 'bg-purple-50 border-purple-200 text-purple-900 hover:bg-purple-100/50', text: 'text-purple-900', label: 'text-purple-600' },
-    { bg: 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100/50', text: 'text-amber-900', label: 'text-amber-600' },
-    { bg: 'bg-rose-50 border-rose-200 text-rose-900 hover:bg-rose-100/50', text: 'text-rose-900', label: 'text-rose-600' },
-    { bg: 'bg-indigo-50 border-indigo-200 text-indigo-900 hover:bg-indigo-100/50', text: 'text-indigo-900', label: 'text-indigo-600' },
-    { bg: 'bg-teal-50 border-teal-200 text-teal-900 hover:bg-teal-100/50', text: 'text-teal-900', label: 'text-teal-600' },
-    { bg: 'bg-cyan-50 border-cyan-200 text-cyan-900 hover:bg-cyan-100/50', text: 'text-cyan-900', label: 'text-cyan-600' },
-    { bg: 'bg-violet-50 border-violet-200 text-violet-900 hover:bg-violet-100/50', text: 'text-violet-900', label: 'text-violet-600' },
-    { bg: 'bg-orange-50 border-orange-200 text-orange-900 hover:bg-orange-100/50', text: 'text-orange-900', label: 'text-orange-600' },
-    { bg: 'bg-lime-50 border-lime-200 text-lime-900 hover:bg-lime-100/50', text: 'text-lime-900', label: 'text-lime-600' },
-    { bg: 'bg-pink-50 border-pink-200 text-pink-900 hover:bg-pink-100/50', text: 'text-pink-900', label: 'text-pink-600' },
-  ];
+  const hues = [210, 140, 280, 40, 340, 255, 175, 195, 290, 20, 90, 320];
   const listIndex = list.findIndex(item => item.id === id);
   const index = listIndex !== -1 ? listIndex : 0;
-  return colors[index % colors.length];
+  const hue = hues[index % hues.length];
+  return {
+    style: {
+      backgroundColor: `hsl(${hue}, 80%, 96%)`,
+      borderColor: `hsl(${hue}, 40%, 80%)`,
+      color: `hsl(${hue}, 80%, 25%)`
+    },
+    labelStyle: {
+      color: `hsl(${hue}, 70%, 40%)`
+    }
+  };
 };
 
 const getAuxiliarColor = (id: string, list: Auxiliar[]) => {
-  const colors = [
-    { badge: 'bg-violet-100 text-violet-800 border border-violet-200' },
-    { badge: 'bg-sky-100 text-sky-800 border border-sky-200' },
-    { badge: 'bg-teal-100 text-teal-800 border border-teal-200' },
-    { badge: 'bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200' },
-    { badge: 'bg-orange-100 text-orange-800 border border-orange-200' },
-    { badge: 'bg-lime-100 text-lime-800 border border-lime-200' },
-    { badge: 'bg-rose-100 text-rose-800 border border-rose-200' },
-    { badge: 'bg-cyan-100 text-cyan-800 border border-cyan-200' },
-    { badge: 'bg-amber-100 text-amber-800 border border-amber-200' },
-    { badge: 'bg-indigo-100 text-indigo-800 border border-indigo-200' },
-    { badge: 'bg-emerald-100 text-emerald-800 border border-emerald-200' },
-    { badge: 'bg-red-100 text-red-800 border border-red-200' },
-  ];
+  const hues = [270, 200, 160, 310, 25, 80, 345, 185, 45, 240, 120, 5];
   const listIndex = list.findIndex(item => item.id === id);
   const index = listIndex !== -1 ? listIndex : 0;
-  return colors[index % colors.length];
+  const hue = hues[index % hues.length];
+  return {
+    style: {
+      backgroundColor: `hsl(${hue}, 75%, 90%)`,
+      borderColor: `hsl(${hue}, 40%, 75%)`,
+      color: `hsl(${hue}, 85%, 25%)`
+    }
+  };
 };
 
 export default function CronogramaPage() {
@@ -278,7 +269,7 @@ export default function CronogramaPage() {
             {pacientes.map((p) => {
               const colors = getPatientColor(p.id, pacientes);
               return (
-                <span key={p.id} className={`px-3 py-1 rounded-full text-xs font-semibold border ${colors.bg}`}>
+                <span key={p.id} className="px-3 py-1 rounded-full text-xs font-semibold border" style={colors.style}>
                   {p.nombre_completo}
                 </span>
               );
@@ -291,7 +282,7 @@ export default function CronogramaPage() {
             {auxiliares.map((a) => {
               const colors = getAuxiliarColor(a.id, auxiliares);
               return (
-                <span key={a.id} className={`px-3 py-1 rounded-full text-xs font-semibold ${colors.badge}`}>
+                <span key={a.id} className="px-3 py-1 rounded-full text-xs font-semibold border" style={colors.style}>
                   {a.nombre}
                 </span>
               );
@@ -345,17 +336,18 @@ export default function CronogramaPage() {
                       <div 
                         key={t.id} 
                         onClick={() => handleOpenModal(t)}
-                        className={`p-3 rounded-xl text-xs border cursor-pointer hover:shadow-md transition-all ${pColors.bg}`}
+                        className="p-3 rounded-xl text-xs border cursor-pointer hover:shadow-md transition-all"
+                        style={pColors.style}
                       >
-                        <p className={`font-bold truncate ${pColors.text}`}>
+                        <p className="font-bold truncate">
                           {t.pacientes?.nombre_completo || 'Paciente Desconocido'}
                         </p>
                         <div className="mt-1.5 mb-2">
-                          <span className={`inline-block px-2.5 py-1 rounded-lg font-semibold text-[10px] truncate max-w-full ${aColors.badge}`}>
+                          <span className="inline-block px-2.5 py-1 rounded-lg font-semibold text-[10px] truncate max-w-full border" style={aColors.style}>
                             {t.profiles?.nombre || 'Auxiliar Desconocido'}
                           </span>
                         </div>
-                        <div className={`flex items-center gap-1 text-[10px] font-medium ${pColors.label}`}>
+                        <div className="flex items-center gap-1 text-[10px] font-medium" style={pColors.labelStyle}>
                           <Clock className="w-3 h-3" />
                           {t.fecha_inicio.includes('T') ? t.fecha_inicio.split('T')[1].substring(0,5) : t.fecha_inicio} ({t.tipo_turno})
                         </div>
