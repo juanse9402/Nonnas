@@ -20,6 +20,40 @@ type Turno = {
 type Paciente = { id: string; nombre_completo: string };
 type Auxiliar = { id: string; nombre: string };
 
+const getPatientColor = (id: string) => {
+  const colors = [
+    { bg: 'bg-blue-50 border-blue-200 text-blue-900 hover:bg-blue-100/50', text: 'text-blue-900', label: 'text-blue-600' },
+    { bg: 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:bg-emerald-100/50', text: 'text-emerald-900', label: 'text-emerald-600' },
+    { bg: 'bg-purple-50 border-purple-200 text-purple-900 hover:bg-purple-100/50', text: 'text-purple-900', label: 'text-purple-600' },
+    { bg: 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100/50', text: 'text-amber-900', label: 'text-amber-600' },
+    { bg: 'bg-rose-50 border-rose-200 text-rose-900 hover:bg-rose-100/50', text: 'text-rose-900', label: 'text-rose-600' },
+    { bg: 'bg-indigo-50 border-indigo-200 text-indigo-900 hover:bg-indigo-100/50', text: 'text-indigo-900', label: 'text-indigo-600' },
+  ];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+};
+
+const getAuxiliarColor = (id: string) => {
+  const colors = [
+    { badge: 'bg-violet-100 text-violet-800 border border-violet-200' },
+    { badge: 'bg-sky-100 text-sky-800 border border-sky-200' },
+    { badge: 'bg-teal-100 text-teal-800 border border-teal-200' },
+    { badge: 'bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200' },
+    { badge: 'bg-orange-100 text-orange-800 border border-orange-200' },
+    { badge: 'bg-lime-100 text-lime-800 border border-lime-200' },
+  ];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+};
+
 export default function CronogramaPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [turnos, setTurnos] = useState<Turno[]>([]);
@@ -193,6 +227,35 @@ export default function CronogramaPage() {
           Asignar Turno
         </button>
       </div>
+      {/* Leyenda de Colores */}
+      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pacientes (Color de Tarjeta):</span>
+          <div className="flex flex-wrap gap-2">
+            {pacientes.map((p) => {
+              const colors = getPatientColor(p.id);
+              return (
+                <span key={p.id} className={`px-3 py-1 rounded-full text-xs font-semibold border ${colors.bg}`}>
+                  {p.nombre_completo}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-3">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Auxiliares (Tarjeta Pequeña):</span>
+          <div className="flex flex-wrap gap-2">
+            {auxiliares.map((a) => {
+              const colors = getAuxiliarColor(a.id);
+              return (
+                <span key={a.id} className={`px-3 py-1 rounded-full text-xs font-semibold ${colors.badge}`}>
+                  {a.nombre}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Controles del calendario */}
@@ -232,20 +295,30 @@ export default function CronogramaPage() {
                     
                     return fechaDia >= inicio && fechaDia <= fin;
                   })
-                  .map((t) => (
-                    <div 
-                      key={t.id} 
-                      onClick={() => handleOpenModal(t)}
-                      className="p-2 rounded-lg text-xs bg-[#4FD1C5]/10 border border-[#4FD1C5]/30 cursor-pointer hover:bg-[#4FD1C5]/20 hover:shadow-sm transition-all"
-                    >
-                      <p className="font-bold text-[#2B6CB0] truncate">{t.pacientes?.nombre_completo || 'Paciente Desconocido'}</p>
-                      <p className="text-gray-600 truncate">{t.profiles?.nombre || 'Auxiliar Desconocido'}</p>
-                      <div className="flex items-center gap-1 mt-2 text-gray-500 font-medium">
-                        <Clock className="w-3 h-3" />
-                        {t.fecha_inicio.includes('T') ? t.fecha_inicio.split('T')[1].substring(0,5) : t.fecha_inicio} ({t.tipo_turno})
+                  .map((t) => {
+                    const pColors = getPatientColor(t.paciente_id);
+                    const aColors = getAuxiliarColor(t.auxiliar_id);
+                    return (
+                      <div 
+                        key={t.id} 
+                        onClick={() => handleOpenModal(t)}
+                        className={`p-3 rounded-xl text-xs border cursor-pointer hover:shadow-md transition-all ${pColors.bg}`}
+                      >
+                        <p className={`font-bold truncate ${pColors.text}`}>
+                          {t.pacientes?.nombre_completo || 'Paciente Desconocido'}
+                        </p>
+                        <div className="mt-1.5 mb-2">
+                          <span className={`inline-block px-2.5 py-1 rounded-lg font-semibold text-[10px] truncate max-w-full ${aColors.badge}`}>
+                            {t.profiles?.nombre || 'Auxiliar Desconocido'}
+                          </span>
+                        </div>
+                        <div className={`flex items-center gap-1 text-[10px] font-medium ${pColors.label}`}>
+                          <Clock className="w-3 h-3" />
+                          {t.fecha_inicio.includes('T') ? t.fecha_inicio.split('T')[1].substring(0,5) : t.fecha_inicio} ({t.tipo_turno})
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </div>
           ))}
