@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, Clock } from "lucide-react";
-import { format, addDays, startOfWeek, subWeeks, addWeeks, isSameDay, startOfMonth, endOfMonth } from "date-fns";
+import { format, addDays, startOfWeek, subWeeks, addWeeks, addMonths, isSameDay, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
 type Turno = {
@@ -35,6 +35,8 @@ export default function CronogramaPage() {
     fecha_inicio: format(new Date(), "yyyy-MM-dd'T'08:00"),
     fecha_fin: format(new Date(), "yyyy-MM-dd'T'20:00"),
     tipo_turno: "12h",
+    repetir: "ninguno",
+    repetir_cant: "4",
   });
 
   const startDate = startOfWeek(currentDate, { weekStartsOn: 1 });
@@ -83,6 +85,8 @@ export default function CronogramaPage() {
         fecha_inicio: turno.fecha_inicio,
         fecha_fin: turno.fecha_fin,
         tipo_turno: turno.tipo_turno,
+        repetir: "ninguno",
+        repetir_cant: "4",
       });
     } else {
       setEditingId(null);
@@ -92,6 +96,8 @@ export default function CronogramaPage() {
         fecha_inicio: format(new Date(), "yyyy-MM-dd'T'08:00"),
         fecha_fin: format(new Date(), "yyyy-MM-dd'T'20:00"),
         tipo_turno: "12h",
+        repetir: "ninguno",
+        repetir_cant: "4",
       });
     }
     setModalOpen(true);
@@ -116,7 +122,36 @@ export default function CronogramaPage() {
         alert("Error al actualizar el turno");
       }
     } else {
-      const { error } = await supabase.from("turnos_cronograma").insert([payload]);
+      const payloads = [payload];
+      
+      if (formData.repetir !== "ninguno") {
+        const cant = parseInt(formData.repetir_cant) || 1;
+        const inicioOriginal = new Date(formData.fecha_inicio);
+        const finOriginal = new Date(formData.fecha_fin);
+        
+        for (let i = 1; i <= cant; i++) {
+          let nuevoInicio: Date;
+          let nuevoFin: Date;
+          
+          if (formData.repetir === "semanal") {
+            nuevoInicio = addWeeks(inicioOriginal, i);
+            nuevoFin = addWeeks(finOriginal, i);
+          } else { // mensual
+            nuevoInicio = addMonths(inicioOriginal, i);
+            nuevoFin = addMonths(finOriginal, i);
+          }
+          
+          payloads.push({
+            paciente_id: formData.paciente_id,
+            auxiliar_id: formData.auxiliar_id,
+            fecha_inicio: format(nuevoInicio, "yyyy-MM-dd'T'HH:mm"),
+            fecha_fin: format(nuevoFin, "yyyy-MM-dd'T'HH:mm"),
+            tipo_turno: formData.tipo_turno,
+          });
+        }
+      }
+
+      const { error } = await supabase.from("turnos_cronograma").insert(payloads);
       if (!error) {
         setModalOpen(false);
         fetchData();
@@ -259,6 +294,37 @@ export default function CronogramaPage() {
                   <option value="24h">24 Horas</option>
                 </select>
               </div>
+              {!editingId && (
+                <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Repetir turno</label>
+                    <select 
+                      value={formData.repetir} 
+                      onChange={(e) => setFormData({...formData, repetir: e.target.value})} 
+                      className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] bg-white text-sm"
+                    >
+                      <option value="ninguno">No repetir</option>
+                      <option value="semanal">Semanalmente</option>
+                      <option value="mensual">Mensualmente</option>
+                    </select>
+                  </div>
+                  {formData.repetir !== "ninguno" && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Veces ({formData.repetir === 'semanal' ? 'semanas' : 'meses'})
+                      </label>
+                      <input 
+                        type="number" 
+                        min="1" 
+                        max="52" 
+                        value={formData.repetir_cant} 
+                        onChange={(e) => setFormData({...formData, repetir_cant: e.target.value})} 
+                        className="w-full border rounded-xl p-3 focus:ring-[#4FD1C5] text-sm" 
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="pt-4 flex gap-3 flex-wrap">
                 <button type="button" onClick={() => setModalOpen(false)} className="flex-1 py-3 px-4 border rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors">
                   Cancelar
