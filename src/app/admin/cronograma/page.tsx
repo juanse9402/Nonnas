@@ -51,6 +51,27 @@ const getAuxiliarColor = (id: string, list: Auxiliar[]) => {
   };
 };
 
+const formatForDateTimeLocal = (dateString: string) => {
+  if (!dateString) return "";
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) {
+      if (dateString.includes('T') && dateString.length >= 16) {
+        return dateString.substring(0, 16);
+      }
+      return "";
+    }
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (e) {
+    return "";
+  }
+};
+
 export default function CronogramaPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [turnos, setTurnos] = useState<Turno[]>([]);
@@ -113,8 +134,8 @@ export default function CronogramaPage() {
       setFormData({
         paciente_id: turno.paciente_id,
         auxiliar_id: turno.auxiliar_id,
-        fecha_inicio: turno.fecha_inicio,
-        fecha_fin: turno.fecha_fin,
+        fecha_inicio: formatForDateTimeLocal(turno.fecha_inicio),
+        fecha_fin: formatForDateTimeLocal(turno.fecha_fin),
         tipo_turno: turno.tipo_turno,
         repetir: "ninguno",
         repetir_cant: "4",
