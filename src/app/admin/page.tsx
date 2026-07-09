@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Users, UserSquare2, CalendarDays, Activity, AlertTriangle } from "lucide-react";
@@ -65,7 +66,7 @@ export default function AdminDashboard() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
   useEffect(() => {
     fetchMetrics();
@@ -101,9 +102,9 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = [
-    { title: "Pacientes Registrados", value: metrics.pacientes, icon: Users, color: "bg-blue-100 text-[#2B6CB0]" },
-    { title: "Auxiliares Activos", value: metrics.auxiliares, icon: UserSquare2, color: "bg-teal-100 text-[#4FD1C5]" },
-    { title: "Turnos Programados Hoy", value: metrics.turnosHoy, icon: CalendarDays, color: "bg-purple-100 text-purple-600" },
+    { title: "Pacientes Registrados", value: metrics.pacientes, icon: Users, color: "bg-blue-100 text-[#2B6CB0]", href: "/admin/pacientes" },
+    { title: "Auxiliares Activos", value: metrics.auxiliares, icon: UserSquare2, color: "bg-teal-100 text-[#4FD1C5]", href: "/admin/auxiliares" },
+    { title: "Turnos Programados Hoy", value: metrics.turnosHoy, icon: CalendarDays, color: "bg-purple-100 text-purple-600", href: "/admin/cronograma" },
   ];
 
   if (connectionError) {
@@ -131,7 +132,11 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {statCards.map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+          <Link 
+            href={stat.href} 
+            key={i} 
+            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md hover:border-gray-200 transition-all duration-200 cursor-pointer block"
+          >
             <div className={`p-4 rounded-xl ${stat.color}`}>
               <stat.icon className="w-8 h-8" />
             </div>
@@ -143,7 +148,7 @@ export default function AdminDashboard() {
                 <h3 className="text-3xl font-bold text-gray-800">{stat.value}</h3>
               )}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
